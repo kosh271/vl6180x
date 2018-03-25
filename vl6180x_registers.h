@@ -1,0 +1,89 @@
+#ifndef _VL6180X_REGISTERS_H_
+#define _VL6180X_REGISTERS_H_
+
+
+#define VL6180X_DEFAULT_DEVICE_ADDRESS 0x29
+
+//Registers per the VL6180X Datasheet (Table 25, Table 28)
+//(March 2016 - DocID026171 Rev 7)
+
+//Identification Registers (0x00 - 0x0F)
+#define VL6180X_IDENTIFICATION__MODEL_ID                 0x000
+#define VL6180X_IDENTIFICATION__MODEL_REV_MAJOR          0x001
+#define VL6180X_IDENTIFICATION__MODEL_REV_MINOR          0x002
+#define VL6180X_IDENTIFICATION__MODULE_REV_MAJOR         0x003
+#define VL6180X_IDENTIFICATION__MODULE_REV_MINOR         0x004
+#define VL6180X_IDENTIFICATION__DATE_HI                  0x006
+#define VL6180X_IDENTIFICATION__DATE_LO                  0x007
+#define VL6180X_IDENTIFICATION__TIME1                    0x008
+#define VL6180X_IDENTIFICATION__TIME2                    0x009
+
+//System Setup Registers (0x10 - 0x17)
+#define VL6180X_SYSTEM__MODE_GPIO0                       0x010
+#define VL6180X_SYSTEM__MODE_GPIO1                       0x011
+#define VL6180X_SYSTEM__HISTORY_CTRL                     0x012
+#define VL6180X_SYSTEM__INTERRUPT_CONFIG_GPIO            0x014
+#define VL6180X_SYSTEM__INTERRUPT_CLEAR                  0x015
+#define VL6180X_SYSTEM__FRESH_OUT_OF_RESET               0x016
+#define VL6180X_SYSTEM__GROUPED_PARAMETER_HOLD           0x017
+
+//Range Setup Registers (0x18 - 0x37)
+#define VL6180X_SYSRANGE__START                          0x018
+#define VL6180X_SYSRANGE__THRESH_HIGH                    0x019
+#define VL6180X_SYSRANGE__THRESH_LOW                     0x01A
+#define VL6180X_SYSRANGE__INTERMEASUREMENT_PERIOD        0x01B
+#define VL6180X_SYSRANGE__MAX_CONVERGENCE_TIME           0x01C
+#define VL6180X_SYSRANGE__CROSSTALK_COMPENSATION_RATE    0x01E
+#define VL6180X_SYSRANGE__CROSSTALK_VALID_HEIGHT         0x021
+#define VL6180X_SYSRANGE__EARLY_CONVERGENCE_ESTIMATE     0x022
+#define VL6180X_SYSRANGE__PART_TO_PART_RANGE_OFFSET      0x024
+#define VL6180X_SYSRANGE__RANGE_IGNORE_VALID_HEIGHT      0x025
+#define VL6180X_SYSRANGE__RANGE_IGNORE_THRESHOLD         0x026
+#define VL6180X_SYSRANGE__MAX_AMBIENT_LEVEL_MULT         0x02C
+#define VL6180X_SYSRANGE__RANGE_CHECK_ENABLES            0x02D
+#define VL6180X_SYSRANGE__VHV_RECALIBRATE                0x02E
+#define VL6180X_SYSRANGE__VHV_REPEAT_RATE                0x031
+
+//Ambient Light Sensing Setup Registers (0x38 - 0x40)
+#define VL6180X_SYSALS__START                            0x038
+#define VL6180X_SYSALS__THRESH_HIGH                      0x03A
+#define VL6180X_SYSALS__THRESH_LOW                       0x03C
+#define VL6180X_SYSALS__INTERMEASUREMENT_PERIOD          0x03E
+#define VL6180X_SYSALS__ANALOGUE_GAIN                    0x03F
+#define VL6180X_SYSALS__INTEGRATION_PERIOD               0x040
+
+//Results Registers (0x4D - 0x80)
+#define VL6180X_RESULT__RANGE_STATUS                     0x04D
+#define VL6180X_RESULT__ALS_STATUS                       0x04E
+#define VL6180X_RESULT__INTERRUPT_STATUS_GPIO            0x04F
+#define VL6180X_RESULT__ALS_VAL                          0x050
+#define VL6180X_RESULT__HISTORY_BUFFER_0                 0x052
+#define VL6180X_RESULT__HISTORY_BUFFER_1                 0x054
+#define VL6180X_RESULT__HISTORY_BUFFER_2                 0x056
+#define VL6180X_RESULT__HISTORY_BUFFER_3                 0x058
+#define VL6180X_RESULT__HISTORY_BUFFER_4                 0x05A
+#define VL6180X_RESULT__HISTORY_BUFFER_5                 0x05C
+#define VL6180X_RESULT__HISTORY_BUFFER_6                 0x05E
+#define VL6180X_RESULT__HISTORY_BUFFER_7                 0x060
+#define VL6180X_RESULT__RANGE_VAL                        0x062
+#define VL6180X_RESULT__RANGE_RAW                        0x064
+#define VL6180X_RESULT__RANGE_RETURN_RATE                0x066
+#define VL6180X_RESULT__RANGE_REFERENCE_RATE             0x068
+#define VL6180X_RESULT__RANGE_RETURN_SIGNAL_COUNT        0x06C
+#define VL6180X_RESULT__RANGE_REFERENCE_SIGNAL_COUNT     0x070
+#define VL6180X_RESULT__RANGE_RETURN_AMB_COUNT           0x074
+#define VL6180X_RESULT__RANGE_REFERENCE_AMB_COUNT        0x078
+#define VL6180X_RESULT__RANGE_RETURN_CONV_TIME           0x07C
+#define VL6180X_RESULT__RANGE_REFERENCE_CONV_TIME        0x080
+
+//Misc Registers
+#define VL6180X_READOUT__AVERAGING_SAMPLE_PERIOD         0x10A
+#define VL6180X_FIRMWARE__BOOTUP                         0x119
+#define VL6180X_FIRMWARE__RESULT_SCALER                  0x120
+#define VL6180X_I2C_SLAVE__DEVICE_ADDRESS                0x212
+#define VL6180X_INTERLEAVED_MODE__ENABLE                 0x2A3
+
+#endif
+
+
+
