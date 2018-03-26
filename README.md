@@ -12,7 +12,6 @@ This driver was tested using Kernel 4.9.77
 
 ## Specific items needing updates
 - ALS (Ambient Light Sensor) does not use the ready interrupt, hard delay coded instead
-- While range indicates it has both raw and processed values, only the processed value is returned
 - There is no configuration available at runtime, only compile time (probably won't ever be)
 
 ## Test environment

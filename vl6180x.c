@@ -34,10 +34,10 @@ static const struct iio_chan_spec vl6180x_channels[] = {
       .address = VL6180X_RESULT__RANGE_VAL,
       //below not managed yet
 		.info_mask_separate =
-			BIT(IIO_CHAN_INFO_RAW) | BIT(IIO_CHAN_INFO_PROCESSED),
+			BIT(IIO_CHAN_INFO_PROCESSED),
 		.scan_type = {
-			.sign = 'u',      //is 'u' (unsigned)
-			.realbits = 8,    //is 8 bits
+			.sign = 'u',
+			.realbits = 8,
 			.storagebits = 8,
 		},
       .datasheet_name = "PROX",
@@ -50,8 +50,8 @@ static const struct iio_chan_spec vl6180x_channels[] = {
 		.info_mask_separate =
 			BIT(IIO_CHAN_INFO_PROCESSED),
 		.scan_type = {
-			.sign = 'u',      //is 'u' (unsigned)
-			.realbits = 16,   //is 16-bits
+			.sign = 'u',
+			.realbits = 16,
 			.storagebits = 16,
 		},
       .datasheet_name = "ALS",
@@ -165,7 +165,7 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
    int timeout=100;
 
 	mutex_lock(&indio_dev->mlock);
-   
+
    if(chan->type == IIO_DISTANCE) {
 
       printk("Starting ranging.\n");
@@ -194,25 +194,25 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
       }
    } else if(chan->type == IIO_LIGHT) {
       printk("Starting ALS.\n");
-      
+
       //start ALS system (one-shot)
       vl6180x_write_u8(data, VL6180X_SYSALS__START, 0x01);
 
       msleep(300); //250 is fine, 200 too low
-      
-      //Interrupt not functioning for ALS - reason unknown
-      //printk("Waiting for interrupt status.\n");
-      //rd_data_u8 = 0;
-      //while(rd_data_u8) {
-      //   msleep(10);
-      //   vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
-      //   if(timeout == 0) {
-      //      printk("Interrupt status timeout.\n");
-      //      ret = -EINVAL;
-      //      goto timeoutTrue;
-      //   }
-      //   timeout--;
-      //}
+
+      // Interrupt not functioning for ALS - reason unknown
+      // printk("Waiting for interrupt status.\n");
+      // rd_data_u8 = 0;
+      // while(rd_data_u8) {
+      //    msleep(10);
+      //    vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
+      //    if(timeout == 0) {
+      //       printk("Interrupt status timeout.\n");
+      //       ret = -EINVAL;
+      //       goto timeoutTrue;
+      //    }
+      //    timeout--;
+      // }
 
       ret = vl6180x_read_u16(data, chan->address, &rd_data_u16);
       if (!ret) {
@@ -277,22 +277,26 @@ static int vl6180x_init_per_AN4545(struct vl6180x_data *data) {
    vl6180x_write_u8(data, 0x01A7, 0x1F);
    vl6180x_write_u8(data, 0x0030, 0x00);
 
+   return 0;
+}
+
+static int vl6180x_public_registers(struct vl6180x_data *data) {
    // Recommended : Public registers - See data sheet for more detail
 
    // Enables polling for New Sample ready when measurement completes
    vl6180x_write_u8(data, VL6180X_SYSTEM__MODE_GPIO1, 0x10);
-   /* Set the averaging sample period (compromise between lower noise and increased execution time) */
+   // Set the averaging sample period (compromise between lower noise and increased execution time)
    vl6180x_write_u8(data, VL6180X_READOUT__AVERAGING_SAMPLE_PERIOD, 0x30);
-   /* Sets the light and dark gain (upper nibble). Dark gain should not be changed.*/
+   // Sets the light and dark gain (upper nibble). Dark gain should not be changed.
    vl6180x_write_u8(data, VL6180X_SYSALS__ANALOGUE_GAIN, 0x46);
-   /* sets the # of range measurements after which auto calibration of system is performed */
+   // sets the # of range measurements after which auto calibration of system is performed
    vl6180x_write_u8(data, VL6180X_SYSRANGE__VHV_REPEAT_RATE, 0xFF);
-   /* Set ALS integration time to 100ms */
+   // Set ALS integration time to 100ms
    vl6180x_write_u8(data, VL6180X_SYSALS__INTEGRATION_PERIOD, 0x63);
-   /* perform a single temperature calibration of the ranging sensor */
+   // perform a single temperature calibration of the ranging sensor
    vl6180x_write_u8(data, VL6180X_SYSRANGE__VHV_RECALIBRATE, 0x01);
 
-   /* Configure GPIO Interrupt behavior */
+   // Configure GPIO Interrupt behavior
    vl6180x_write_u8(data, VL6180X_SYSTEM__INTERRUPT_CONFIG_GPIO, 0x24);
 
    //set register indicating configuration complete (don't need to re-init on driver load)
@@ -352,6 +356,9 @@ static int vl6180x_probe(struct i2c_client *client, const struct i2c_device_id *
    //init per ST application note AN4545, section 9 - "Mandatory : private registers"
    vl6180x_init_per_AN4545(data);
 
+   //init public registers
+   vl6180x_public_registers(data);
+
 	ret = iio_device_register(indio_dev);
 	if (ret)
 		goto error_unreg_buffer;
@@ -406,5 +413,6 @@ module_i2c_driver(vl6180x_driver);
 MODULE_AUTHOR("Michael Wilson <mgwilson271@gmail.com>");
 MODULE_DESCRIPTION("STMicroelectronics VL6180X IIO Driver");
 MODULE_LICENSE("GPL");
+MODULE_VERSION("0.2");
 
 
