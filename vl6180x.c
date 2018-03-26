@@ -32,7 +32,6 @@ static const struct iio_chan_spec vl6180x_channels[] = {
 	{
 		.type = IIO_DISTANCE,
       .address = VL6180X_RESULT__RANGE_VAL,
-      //below not managed yet
 		.info_mask_separate =
 			BIT(IIO_CHAN_INFO_PROCESSED),
 		.scan_type = {
@@ -46,7 +45,6 @@ static const struct iio_chan_spec vl6180x_channels[] = {
 	{
 		.type = IIO_LIGHT,
       .address = VL6180X_RESULT__ALS_VAL,
-      //below not managed yet
 		.info_mask_separate =
 			BIT(IIO_CHAN_INFO_PROCESSED),
 		.scan_type = {
@@ -171,7 +169,7 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
       vl6180x_write_u8(data, VL6180X_SYSRANGE__START, 0x01);
 
       rd_data_u8 = 0;
-      while(rd_data_u8) {
+      while(!rd_data_u8) {
          msleep(10);
          vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
          if(timeout == 0) {
@@ -191,19 +189,17 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
       //start ALS system (one-shot)
       vl6180x_write_u8(data, VL6180X_SYSALS__START, 0x01);
 
-      msleep(300); //250 is fine, 200 too low
-
-      // rd_data_u8 = 0;
-      // while(rd_data_u8) {
-      //    msleep(10);
-      //    vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
-      //    if(timeout == 0) {
-      //       printk("vl6180x Interrupt status timeout.\n");
-      //       ret = -EINVAL;
-      //       goto timeoutTrue;
-      //    }
-      //    timeout--;
-      // }
+      rd_data_u8 = 0;
+      while(!rd_data_u8) {
+         msleep(10);
+         vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
+         if(timeout == 0) {
+            printk("vl6180x Interrupt status timeout.\n");
+            ret = -EINVAL;
+            goto timeoutTrue;
+         }
+         timeout--;
+      }
 
       ret = vl6180x_read_u16(data, chan->address, &rd_data_u16);
       if (!ret) {
@@ -402,6 +398,6 @@ module_i2c_driver(vl6180x_driver);
 MODULE_AUTHOR("Michael Wilson <mgwilson271@gmail.com>");
 MODULE_DESCRIPTION("STMicroelectronics VL6180X IIO Driver");
 MODULE_LICENSE("GPL");
-MODULE_VERSION("0.3");
+MODULE_VERSION("0.4");
 
 
