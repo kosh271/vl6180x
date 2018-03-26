@@ -321,8 +321,10 @@ static int vl6180x_probe(struct i2c_client *client, const struct i2c_device_id *
       mutex_lock(&indio_dev->mlock);
       ret = vl6180x_read_u8(data, VL6180X_IDENTIFICATION__MODEL_ID, &rd_data_u8);
       if(!ret) {
-         if(rd_data_u8 != 0xB4)
+         if(rd_data_u8 != 0xB4) {
             printk("Invalid VL6180X ID: 0x%02X (expected 0xB4)\n", rd_data_u8);
+            goto error_free_device;
+         }
       }
       mutex_unlock(&indio_dev->mlock);
    }
@@ -335,11 +337,10 @@ static int vl6180x_probe(struct i2c_client *client, const struct i2c_device_id *
 
 	ret = iio_device_register(indio_dev);
 	if (ret)
-		goto error_unreg_buffer;
+		goto error_free_device;
 
 	return 0;
 
-error_unreg_buffer:
 error_free_device:
 	devm_iio_device_free(&client->dev, indio_dev);
 	return ret;
@@ -387,6 +388,6 @@ module_i2c_driver(vl6180x_driver);
 MODULE_AUTHOR("Michael Wilson <mgwilson271@gmail.com>");
 MODULE_DESCRIPTION("STMicroelectronics VL6180X IIO Driver");
 MODULE_LICENSE("GPL");
-MODULE_VERSION("0.6");
+MODULE_VERSION("0.7");
 
 
