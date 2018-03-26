@@ -152,6 +152,23 @@ static int vl6180x_read_u16(struct vl6180x_data *data, u16 reg, u16 *rd_data_u16
    return -ETIMEDOUT;
 }
 
+static int wait_interrupt_status_gpio(struct vl6180x_data *data) {
+   u8 rd_data_u8=0;
+   int timeout=100;
+
+   while(!rd_data_u8) {
+      msleep(10);
+      vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
+      if(timeout == 0) {
+         printk("vl6180x Interrupt status timeout.\n");
+         return -EINVAL;
+      }
+      timeout--;
+   }
+
+   return 0;
+}
+
 static int vl6180x_read_raw(struct iio_dev *indio_dev,
 			  struct iio_chan_spec const *chan,
 			  int *val, int *val2, long mask)
@@ -160,7 +177,6 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
 	int ret = -EINVAL;
    u8 rd_data_u8;
    u16 rd_data_u16;
-   int timeout=100;
 
 	mutex_lock(&indio_dev->mlock);
 
@@ -168,17 +184,9 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
       //start ranging system (one-shot)
       vl6180x_write_u8(data, VL6180X_SYSRANGE__START, 0x01);
 
-      rd_data_u8 = 0;
-      while(!rd_data_u8) {
-         msleep(10);
-         vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
-         if(timeout == 0) {
-            printk("vl6180x Interrupt status timeout.\n");
-            ret = -EINVAL;
-            goto timeoutTrue;
-         }
-         timeout--;
-      }
+      ret = wait_interrupt_status_gpio(data);
+      if(ret)
+         goto timeoutTrue;
 
       ret = vl6180x_read_u8(data, chan->address, &rd_data_u8);
       if (!ret) {
@@ -189,17 +197,9 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
       //start ALS system (one-shot)
       vl6180x_write_u8(data, VL6180X_SYSALS__START, 0x01);
 
-      rd_data_u8 = 0;
-      while(!rd_data_u8) {
-         msleep(10);
-         vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
-         if(timeout == 0) {
-            printk("vl6180x Interrupt status timeout.\n");
-            ret = -EINVAL;
-            goto timeoutTrue;
-         }
-         timeout--;
-      }
+      ret = wait_interrupt_status_gpio(data);
+      if(ret)
+         goto timeoutTrue;
 
       ret = vl6180x_read_u16(data, chan->address, &rd_data_u16);
       if (!ret) {
@@ -227,7 +227,7 @@ static int vl6180x_init_per_AN4545(struct vl6180x_data *data) {
    //check to see if device has already been initialized
    vl6180x_read_u8(data, VL6180X_SYSTEM__FRESH_OUT_OF_RESET, &rd_data_u8);
    if(rd_data_u8 != 1) {
-      printk("Skipping initialization - vl6180x has already been configured\n");
+      printk("vl6180x - Skipping initialization, devcie has already been configured\n");
       return 0;
    }
    printk("Performing first-boot initialization for vl6180x\n");
@@ -398,6 +398,6 @@ module_i2c_driver(vl6180x_driver);
 MODULE_AUTHOR("Michael Wilson <mgwilson271@gmail.com>");
 MODULE_DESCRIPTION("STMicroelectronics VL6180X IIO Driver");
 MODULE_LICENSE("GPL");
-MODULE_VERSION("0.4");
+MODULE_VERSION("0.5");
 
 
