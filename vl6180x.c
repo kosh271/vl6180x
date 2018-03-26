@@ -4,19 +4,8 @@
 #include <linux/delay.h>
 #include <linux/module.h>
 #include <linux/iio/iio.h>
-#include <linux/iio/sysfs.h>
-#include <linux/iio/buffer.h>
-#include <linux/iio/trigger.h>
-#include <linux/iio/triggered_buffer.h>
-#include <linux/iio/trigger_consumer.h>
 
 #include "vl6180x_registers.h"
-
-//sys/devices/iio:device0/
-//https://elixir.bootlin.com/linux/v4.7/source/drivers/iio/dummy/iio_simple_dummy.c
-//https://elixir.bootlin.com/linux/v4.7/source/drivers/iio/proximity/pulsedlight-lidar-lite-v2.c
-//https://github.com/pololu/vl6180x-arduino/blob/master/VL6180X.cpp
-
 
 #define VL6180X_DRV_NAME "vl6180x"
 
@@ -398,6 +387,6 @@ module_i2c_driver(vl6180x_driver);
 MODULE_AUTHOR("Michael Wilson <mgwilson271@gmail.com>");
 MODULE_DESCRIPTION("STMicroelectronics VL6180X IIO Driver");
 MODULE_LICENSE("GPL");
-MODULE_VERSION("0.5");
+MODULE_VERSION("0.6");
 
 
