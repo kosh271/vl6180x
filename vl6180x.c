@@ -167,19 +167,15 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
 	mutex_lock(&indio_dev->mlock);
 
    if(chan->type == IIO_DISTANCE) {
-
-      printk("Starting ranging.\n");
-
       //start ranging system (one-shot)
       vl6180x_write_u8(data, VL6180X_SYSRANGE__START, 0x01);
 
-      printk("Waiting for interrupt status.\n");
       rd_data_u8 = 0;
       while(rd_data_u8) {
          msleep(10);
          vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
          if(timeout == 0) {
-            printk("Interrupt status timeout.\n");
+            printk("vl6180x Interrupt status timeout.\n");
             ret = -EINVAL;
             goto timeoutTrue;
          }
@@ -188,26 +184,21 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
 
       ret = vl6180x_read_u8(data, chan->address, &rd_data_u8);
       if (!ret) {
-         printk("vl6180x_read_raw: 0x%02X@%lu\n", rd_data_u8, chan->address);
          *val = rd_data_u8;
          ret = IIO_VAL_INT;
       }
    } else if(chan->type == IIO_LIGHT) {
-      printk("Starting ALS.\n");
-
       //start ALS system (one-shot)
       vl6180x_write_u8(data, VL6180X_SYSALS__START, 0x01);
 
       msleep(300); //250 is fine, 200 too low
 
-      // Interrupt not functioning for ALS - reason unknown
-      // printk("Waiting for interrupt status.\n");
       // rd_data_u8 = 0;
       // while(rd_data_u8) {
       //    msleep(10);
       //    vl6180x_read_u8(data, VL6180X_RESULT__INTERRUPT_STATUS_GPIO, &rd_data_u8);
       //    if(timeout == 0) {
-      //       printk("Interrupt status timeout.\n");
+      //       printk("vl6180x Interrupt status timeout.\n");
       //       ret = -EINVAL;
       //       goto timeoutTrue;
       //    }
@@ -216,7 +207,6 @@ static int vl6180x_read_raw(struct iio_dev *indio_dev,
 
       ret = vl6180x_read_u16(data, chan->address, &rd_data_u16);
       if (!ret) {
-         printk("vl6180x_read_raw: 0x%04X@%lu\n", rd_data_u16, chan->address);
          *val = rd_data_u16;
          ret = IIO_VAL_INT;
       }
@@ -244,6 +234,7 @@ static int vl6180x_init_per_AN4545(struct vl6180x_data *data) {
       printk("Skipping initialization - vl6180x has already been configured\n");
       return 0;
    }
+   printk("Performing first-boot initialization for vl6180x\n");
 
    // Mandatory: Private registers
    vl6180x_write_u8(data, 0x0207, 0x01);
@@ -340,14 +331,12 @@ static int vl6180x_probe(struct i2c_client *client, const struct i2c_device_id *
    data->client = client;
    data->indio_dev = indio_dev;
 
-   //Debug
+   //Sanity
    {
       mutex_lock(&indio_dev->mlock);
       ret = vl6180x_read_u8(data, VL6180X_IDENTIFICATION__MODEL_ID, &rd_data_u8);
       if(!ret) {
-         if(rd_data_u8 == 0xB4)
-            printk("Valid VL6180X ID: 0x%02X (expected 0xB4)\n", rd_data_u8);
-         else
+         if(rd_data_u8 != 0xB4)
             printk("Invalid VL6180X ID: 0x%02X (expected 0xB4)\n", rd_data_u8);
       }
       mutex_unlock(&indio_dev->mlock);
@@ -413,6 +402,6 @@ module_i2c_driver(vl6180x_driver);
 MODULE_AUTHOR("Michael Wilson <mgwilson271@gmail.com>");
 MODULE_DESCRIPTION("STMicroelectronics VL6180X IIO Driver");
 MODULE_LICENSE("GPL");
-MODULE_VERSION("0.2");
+MODULE_VERSION("0.3");
 
 
